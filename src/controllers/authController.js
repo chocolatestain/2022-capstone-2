@@ -94,11 +94,9 @@ const authController = {
             const memberResult = await authService.deleteMember(memberId);
 
             if (!memberResult) return res.status(400).send('MEMBER_DELETE_ERROR');
-
             const resData = {
                 result: 'success'
             }
-
             return res.send(resData);
         } catch (err) {
             console.log(err);

@@ -1,7 +1,6 @@
-const { member, sequelize } = require('../../models');
+const { member, sequelize, Sequelize } = require('../../models');
 const axios = require('axios');
 const jwt = require('jsonwebtoken');
-const { now } = require('sequelize/types/utils');
 require('dotenv').config();
 
 const authService = {
@@ -67,17 +66,21 @@ const authService = {
             console.log(err);
             return err;
         })
-
         return memberResult;
     },
 
     deleteMember: async (memberId) => {
-        const memberResult = await member.update({deleted_at : now()},{where:{member_id:memberId}})
-        .catch((err)=>{
-            console.log(err)
-            return err;
-        })
-        return memberResult;
+        // Sequelize -> DB (deleted_at 접근 불가) datagrip -> DB Query (deleted_at 접근 가능)
+        // Sequelize -> datagrip 호환 문제? 
+        // Sequelize 안의 memberId를 Query문 안에 넣을 수 있는 방법?
+        // replacements
+        const memberResult = await sequelize.query('UPDATE `member` SET `deleted_at` = NOW() WHERE `member_id` = :memberid',
+        {
+            replacements : {memberid: memberId},
+        }
+        )
+    
+        return memberResult
     }
 }
 
